@@ -2,8 +2,6 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs';
 import path from 'path';
-import {hideBin} from 'yargs/helpers';
-import yargs from 'yargs';
 
 const __dirname = path.resolve();
 const outputDir = path.join(__dirname, 'scraped_data');

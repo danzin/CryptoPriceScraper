@@ -11,7 +11,7 @@ const port = 4200;
 const argv = yargs(hideBin(process.argv))
   .option('coins', {
     type: 'string',
-    description: 'Comma-separated list of coins to track',
+    description: "Comma-separated list of coins to track, as they appear in Coingecko's url. No tickers.",
     default: 'bitcoin,ethereum,solana',
     coerce: (arg) => arg.split(',')
   })
