@@ -1,5 +1,5 @@
 {
-  "name": "easypricescraper",
+  "name": "cryptopricescraper",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -9,12 +9,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "node server.js",
-    "monitor": "python runScraper.py --coins=solana,bitcoin,ethereum",
-    "start": "concurrently  \"npm run monitor\" \"npm run server\" "
+    "start": "npm run server"
   },
   "dependencies": {
     "axios": "^1.8.1",
     "cheerio": "^1.0.0",
+    "child_process": "^1.0.2",
     "express": "^4.21.2",
     "puppeteer": "^24.3.0",
     "puppeteer-extra": "^3.3.6",

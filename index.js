@@ -19,7 +19,7 @@ const argv = yargs(hideBin(process.argv)).options('coins', {
 
 console.log(argv.coins)
 
-// Construct urls based on the tickers
+// Construct urls based on the coins
 const urls = argv.coins.map(coin => {
   return `https://www.coingecko.com/en/coins/${coin}`;
 });
