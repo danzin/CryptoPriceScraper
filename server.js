@@ -1,53 +1,34 @@
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import { exec } from 'child_process';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { scraper } from './index.js'
 
-const execAsync = promisify(exec);
-const __dirname = path.resolve();
+
+
 const app = express();
 const port = 4200;
+// Process command-line arguments and convert coins to an array
+const argv = yargs(hideBin(process.argv))
+  .option('coins', {
+    type: 'string',
+    description: 'Comma-separated list of coins to track',
+    default: 'bitcoin,ethereum,solana',
+    coerce: (arg) => arg.split(',')
+  })
+  .argv;
 
-const runScraper = async () => {
-  const scraper = './index.js';
-  const COINS = 'solana,bitcoin,ethereum'; // Coins go here
-  const command = `node ${scraper} --coins=${COINS}`;
+const COINS = argv.coins;
+console.log('COINS:', COINS);
 
-  try {
-    const { stdout, stderr } = await execAsync(command);
-    if (stderr) {
-      console.error('Scraper error:', stderr);
-    }
-    console.log('Scraper:', stdout);
-  } catch (err) {
-    console.error('Error executing scraper:', err);
-    throw err;
-  }
-};
-
+// Express endpoint that runs the scraper and returns the latest prices
 app.get('/api/price', async (req, res) => {
+  console.log(`Request received.`)
   try {
-    await runScraper();
-
-    const filePath = path.join(__dirname, 'scraped_data', 'prices.txt');
-    const data = await fs.promises.readFile(filePath, 'utf8');
-
-    const prices = {};
-    const lines = data.trim().split('\n');
-
-    lines.forEach(line => {
-      const [coin, price] = line.split(' : ');
-      if (coin && price) {
-        prices[coin] = price;
-      }
-    });
-
-    res.json({
-      prices
-    });
+    const prices = await scraper(COINS);
+    res.json({ prices });
   } catch (err) {
-    res.status(500).json({ error: 'Error executing script' });
+    console.error(err)
+    res.status(500).json({ error: 'Error executing scraper' });
   }
 });
 
