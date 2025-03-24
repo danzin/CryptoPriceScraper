@@ -6,6 +6,7 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 
   - `http://localhost:4200/api/price`
      Gets all prices from `prices.txt`. **If used with no flag or `--coins`, runs the scraper with default values or provided coins at every request**
+    When used with `--no-default- 
  
    - `http://localhost:4200/api/:coins`
      Get data for individual assets: `/api/coin1,coin2`.
@@ -21,7 +22,7 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 ```
 ## Flags 
  - `--coins=coin1,coin2...` - Add asset names to the scraper.
- - `--no-defaults` - Excludes defaults, use when you want to scrape specific assets with the `/api/:coins` route
+ - `--no-default` - Excludes defaults, use when you want to scrape specific assets with the `/api/:coins` route. Using this option is higly advised. 
  - No flag - Starts the scraper with default values: 'bitcoin, ethereum, solana'
 
    
@@ -59,7 +60,7 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
    To start the server:
    `node server.js --coins=coin1,coin2,coin3,etc` to always include specific assets in the scraper
 
-   `node server.js --no-defaults` doesn't include any specific asset. Asset prices are scrapped and added by using the `http://localhost:4200/api/:coins` route. 
+   `node server.js --no-default` doesn't include any specific asset. Asset prices are scrapped and added by using the `http://localhost:4200/api/:coins` route. 
    
    It doesn't support tickers. Use the full name of the asset.
 
