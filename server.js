@@ -29,23 +29,39 @@ app.get("/api/price", async (req, res) => {
   }
 });
 
-app.get("/api/:coin", async (req, res) => {
-  const coin = req.params.coin.toLowerCase();
-  console.log(`Request received for specific coin: ${coin}`);
+app.get("/api/:coins", async (req, res) => {
+  const coinsParam = req.params.coins.toLowerCase();
+  const coinArray = coinsParam.split(",");
 
+  console.log(`Request received for specific coins: ${coinsParam}`);
   try {
-    // Scrape only the requested coin
-    const prices = await scraper([coin]);
+    const prices = await scraper(coinArray);
 
-    // Check if we got a price for the requested coin
-    if (prices[coin]) {
-      res.json({ coin, price: prices[coin] });
+    const filteredPrices = {};
+    let foundAny = false;
+
+    coinArray.forEach((coin) => {
+      if (prices[coin]) {
+        filteredPrices[coin] = prices[coin];
+        foundAny = true;
+      }
+    });
+
+    if (foundAny) {
+      res.json({ prices: filteredPrices });
     } else {
-      res.status(404).json({ error: `No price found for ${coin}` });
+      res.status(404).json({
+        error: `No prices found for the requested coins`,
+        requested: coinArray,
+      });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: `Error executing scraper for ${coin}` });
+    res.status(500).json({
+      error: `Error executing scraper`,
+      coins: coinArray,
+      message: err.message,
+    });
   }
 });
 
@@ -53,6 +69,6 @@ app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`Access all prices at: http://localhost:${port}/api/price`);
   console.log(
-    `Access individual coin prices at: http://localhost:${port}/api/[coinname]`
+    `Access individual coin prices at: http://localhost:${port}/api/[coinNames]`
   );
 });
