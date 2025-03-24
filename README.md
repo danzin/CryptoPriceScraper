@@ -6,7 +6,17 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 
   - `http://localhost:4200/api/price`
      Gets all prices from `prices.txt`. **If used with no flag or `--coins`, runs the scraper with default values or provided coins at every request**
-    When used with `--no-default- 
+     When used with `--no-default` it returns the prices without running the scraper.
+
+    Returns JSON response in the format: 
+```json
+{
+    "prices": {
+        "coin1": "$0.000003",
+        "coin2": "$3"
+    }
+}
+```
  
    - `http://localhost:4200/api/:coins`
      Get data for individual assets: `/api/coin1,coin2`.
@@ -22,7 +32,7 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 ```
 ## Flags 
  - `--coins=coin1,coin2...` - Add asset names to the scraper.
- - `--no-default` - Excludes defaults, use when you want to scrape specific assets with the `/api/:coins` route. Using this option is higly advised. 
+ - `--no-default` - Excludes defaults, use when you want to scrape specific assets with the `/api/:coins` route. **Using this option is higly advised, as it allows `/api/price` to run without spinning countless headless browsers every time and it still returns everything in `prices.txt`.** 
  - No flag - Starts the scraper with default values: 'bitcoin, ethereum, solana'
 
    
@@ -92,4 +102,4 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 
 
 
-**Warning: Adding lots of assets can become resource heavy. The scraper spins a separate headless browser for every single asset. If you only need a specific price, use the `--no-default` flag and the `api/:coins` route**
+**Warning: Adding lots of assets can become resource heavy. The scraper spins a separate headless browser for every single asset. If you only need a specific price, use the `--no-default` flag with `api/:coins` route to add prices in the `prices.txt` file**
