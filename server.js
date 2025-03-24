@@ -5,16 +5,27 @@ import { scraper } from "./index.js";
 
 const app = express();
 const port = 4200;
-// Process command-line arguments and convert coins to an array
-const argv = yargs(hideBin(process.argv)).option("coins", {
-  type: "string",
-  description:
-    "Comma-separated list of coins to track, as they appear in Coingecko's url. No tickers.",
-  default: "bitcoin,ethereum,solana",
-  coerce: (arg) => arg.split(","),
-}).argv;
 
-const COINS = argv.coins;
+// Process command-line arguments and convert coins to an array
+const rawArgv = hideBin(process.argv);
+const hasNoDefaultFlag = rawArgv.includes("--no-default");
+
+const argv = yargs(rawArgv)
+  .option("coins", {
+    type: "string",
+    description:
+      "Comma-separated list of coins to track, as they appear in Coingecko's URL. No tickers.",
+    default: "bitcoin,ethereum,solana",
+    coerce: (arg) => arg.split(","),
+  })
+  .option("no-default", {
+    type: "boolean",
+    description: "Start with an empty coins array, ignoring defaults.",
+    default: false,
+  }).argv;
+
+// Override coins if --no-default is present
+const COINS = hasNoDefaultFlag ? [] : argv.coins;
 console.log("COINS:", COINS);
 
 // Express endpoint that runs the scraper and returns the latest prices from prices.txt
