@@ -47,6 +47,10 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
   Maintains price history in `scraped_data/prices.txt`
 -  **Customizable Assets:** Accepts a comma-separated list of coins via command-line arguments. 
 
+## FAQ ❓
+ - **Why not just use the official API?**
+    The free official API has a rate limit of 30 per minute which was not enough at the time of creating the project
+
 ## Prerequisites
 
 - Node.js (v22 or later is recommended)
