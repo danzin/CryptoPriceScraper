@@ -1,85 +1,87 @@
 import express from "express";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import { scraper } from "./index.js";
+import serverless from "serverless-http";
+import { scraper } from "./scraper.js";
 
 const app = express();
-const port = 4200;
 
-// Process command-line arguments and convert coins to an array
-const rawArgv = hideBin(process.argv);
-const hasNoDefaultFlag = rawArgv.includes("--no-default");
-
-const argv = yargs(rawArgv)
-  .option("coins", {
-    type: "string",
-    description:
-      "Comma-separated list of coins to track, as they appear in Coingecko's URL. No tickers.",
-    default: "bitcoin,ethereum,solana",
-    coerce: (arg) => arg.split(","),
-  })
-  .option("no-default", {
-    type: "boolean",
-    description: "Start with an empty coins array, ignoring defaults.",
-    default: false,
-  }).argv;
-
-// Override coins if --no-default is present
-const COINS = hasNoDefaultFlag ? [] : argv.coins;
-console.log("COINS:", COINS);
-
-// Express endpoint that runs the scraper and returns the latest prices from prices.txt
-app.get("/api/price", async (req, res) => {
-  console.log(`Request received.`);
-  try {
-    const prices = await scraper(COINS);
-    res.json({ prices });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error executing scraper" });
-  }
+app.use((req, res, next) => {
+  console.log(`Incoming Request: ${req.method} ${req.path}`);
+  next();
 });
 
-app.get("/api/:coins", async (req, res) => {
-  const coinsParam = req.params.coins.toLowerCase();
-  const coinArray = coinsParam.split(",");
+app.get("/api/price/:coins", async (req, res) => {
+  const coinsParam = req.params.coins ? req.params.coins.toLowerCase() : "";
+  const coinArray = coinsParam.split(",").filter((coin) => coin.trim() !== "");
 
-  console.log(`Request received for specific coins: ${coinsParam}`);
+  if (coinArray.length === 0) {
+    console.log("Request received with no valid coins specified.");
+    return res.status(400).json({
+      error: "No coins specified in the URL path.",
+      usage: "e.g., /api/price/bitcoin,ethereum",
+    });
+  }
+
+  console.log(`Request received for specific coins: ${coinArray.join(", ")}`);
+
   try {
     const prices = await scraper(coinArray);
 
-    const filteredPrices = {};
-    let foundAny = false;
+    if (Object.keys(prices).length > 0) {
+      const successfulPrices = {};
+      let foundAny = false;
+      coinArray.forEach((requestedCoin) => {
+        if (
+          prices[requestedCoin] !== undefined &&
+          prices[requestedCoin] !== null
+        ) {
+          successfulPrices[requestedCoin] = prices[requestedCoin];
+          foundAny = true;
+        }
+      });
 
-    coinArray.forEach((coin) => {
-      if (prices[coin]) {
-        filteredPrices[coin] = prices[coin];
-        foundAny = true;
+      if (foundAny) {
+        console.log("Sending successful prices:", successfulPrices);
+        res.json({ prices: successfulPrices });
+      } else {
+        console.log(
+          "Scraping ran, but no prices could be determined for requested coins:",
+          coinArray
+        );
+        res.status(404).json({
+          error: `Could not retrieve prices for the requested coins. Check coin names and CoinGecko status.`,
+          requested: coinArray,
+          details: prices,
+        });
       }
-    });
-
-    if (foundAny) {
-      res.json({ prices: filteredPrices });
     } else {
+      console.log("Scraper returned empty results.");
       res.status(404).json({
-        error: `No prices found for the requested coins`,
+        error: `No prices found for the requested coins. The scraper might have failed.`,
         requested: coinArray,
       });
     }
   } catch (err) {
-    console.error(err);
+    console.error("Unhandled error during scraping execution:", err);
     res.status(500).json({
       error: `Error executing scraper`,
       coins: coinArray,
-      message: err.message,
+      message: err.message || "An unexpected error occurred.",
     });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-  console.log(`Access all prices at: http://localhost:${port}/api/price`);
-  console.log(
-    `Access individual coin prices at: http://localhost:${port}/api/[coinNames]`
-  );
+app.get("/", (req, res) => {
+  res.json({ message: "Crypto Scraper API. Use /api/price/{coins} endpoint." });
 });
+
+if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  const port = 4200;
+  app.listen(port, () => {
+    console.log(`Server running locally at http://localhost:${port}`);
+    console.log(
+      `Example usage: http://localhost:${port}/api/price/bitcoin,ethereum`
+    );
+  });
+}
+
+export const handler = serverless(app);
