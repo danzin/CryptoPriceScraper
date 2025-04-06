@@ -49,6 +49,7 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 
 ## FAQ ❓
  - **Why not just use the official API?**
+
     The free official API has a rate limit of 30 per minute which was not enough at the time of creating the project
 
 ## Prerequisites
