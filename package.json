@@ -11,8 +11,6 @@
     "start": "echo \"Please just run it with 'node server.js --coins=abc,def...' npm's argument delimiter `--` has been broken for months and it's behaviour is unpredictable"
   },
   "dependencies": {
-    "axios": "^1.8.1",
-    "cheerio": "^1.0.0",
     "child_process": "^1.0.2",
     "chrome-aws-lambda": "^10.1.0",
     "concurrently": "^9.1.2",
