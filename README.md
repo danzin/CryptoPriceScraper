@@ -107,4 +107,4 @@ A small solution for scraping real-time cryptocurrency prices from a popular agg
 
 
 
-**Warning: Adding lots of assets can become resource heavy. The scraper spins a separate headless browser for every single asset. If you only need a specific price, use the `--no-default` flag with `api/:coins` route to add prices in the `prices.txt` file**
+**Warning: Adding lots of assets may become resource heavy. The scraper spins a separate headless browser for every single asset. If you only need a specific price, use the `--no-default` flag with `api/:coins` route to add prices in the `prices.txt` file**
